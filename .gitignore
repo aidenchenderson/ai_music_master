@@ -1,0 +1,20 @@
+# IDE related
+/.vscode
+/.idea
+/.DS_Store
+*.suo 
+*.user 
+*.csproj.user
+
+# build artifacts
+/app/backend/build
+/app/frontend/build
+/app/AI/build
+*.o
+*.out
+*.exe
+
+# dataset files
+/data_gathering/dataset/fma_medium
+*.zip
+*.csv
