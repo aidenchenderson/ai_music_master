@@ -1,76 +1,13 @@
-#include <iostream>
+#include <algorithm>
 #include <cstring>
+#include <fstream>
+#include <iostream>
 #include <portaudio.h>
+
+#include "audio_input.hpp"
 
 #define SAMPLE_RATE 48000
 #define FRAMES_PER_BUFFER 512
-
-typedef struct CallbackData {
-    int input_channel_count;
-} CallbackData;
-
-inline float max(float a, float b) {
-    return a > b ? a : b;
-}
-
-int pa_stream_callback(
-    const void* input_buffer, 
-    void* output_buffer, unsigned long frames_per_buffer, 
-    const PaStreamCallbackTimeInfo* time_info, 
-    PaStreamCallbackFlags status_flags, 
-    void* user_data 
-) {
-    if (input_buffer == nullptr) {
-        std::cout << "Input buffer is null";
-        return 0;
-    }
-    
-    const int16_t* input = static_cast<const int16_t*>(input_buffer);
-    (void)output_buffer;
-
-    CallbackData* data = static_cast<CallbackData*>(user_data);
-    int input_channels = data->input_channel_count;
-
-    int display_size = 100;
-    std::cout << "\r";
-
-    float left_volume = 0;
-    float right_volume = 0;
-
-    if (input_channels == 1) {
-        left_volume = right_volume = 0;
-        for (unsigned long i = 0; i < frames_per_buffer; i++) {
-            float v = std::abs(input[i]) / 32768.0f;
-            left_volume = max(left_volume, v);
-            right_volume = max(right_volume, v);
-        }
-    } else if (input_channels == 2) {
-        left_volume = right_volume = 0;
-        for (unsigned long i = 0; i < frames_per_buffer * 2; i += 2) {
-            float l = std::abs(input[i]) / 32768.0f;
-            float r = std::abs(input[i+1]) / 32768.0f;
-            left_volume  = max(left_volume, l);
-            right_volume = max(right_volume, r);
-        }
-    }
-
-    for (int i = 0; i < display_size; i++) {
-        float proportion = i / static_cast<float>(display_size);
-        if (proportion <= left_volume && proportion <= right_volume) {
-            std::cout << "█";
-        } else if (proportion <= left_volume) {
-            std::cout << "▀";
-        } else if (proportion <= right_volume) {
-            std::cout << "▄";
-        } else {
-            std::cout << " ";
-        }
-    }
-
-    fflush(stdout);
-
-    return 0;
-}
 
 int main(int argc, char** argv) {
     PaError err;
@@ -101,7 +38,7 @@ int main(int argc, char** argv) {
         std::cout << "\tdefault sample rate: " << device_info->defaultSampleRate << "\n";
     }
 
-    int device = 12;
+    int device = 11;
 
     PaStreamParameters input_parameters;
     PaStreamParameters output_parameters;
@@ -120,8 +57,11 @@ int main(int argc, char** argv) {
     output_parameters.sampleFormat = paInt16;
     output_parameters.suggestedLatency = Pa_GetDeviceInfo(device)->defaultLowInputLatency;
 
+    AudioProcessor processor(SAMPLE_RATE);
+
     CallbackData callback_data;
     callback_data.input_channel_count = 2;
+    callback_data.processor = &processor;
 
     PaStream* stream;
     err = Pa_OpenStream(&stream, &input_parameters, nullptr, SAMPLE_RATE, FRAMES_PER_BUFFER, paNoFlag, pa_stream_callback, &callback_data);
@@ -149,6 +89,18 @@ int main(int argc, char** argv) {
         std::cout << "error closing audio stream: " << Pa_GetErrorText(err) << "\n";
         return 1;
     }
+
+    const auto& spec = processor.getSpectrogram();
+
+    std::ofstream out("spectrogram.csv");
+    for (const auto& frame : spec) {
+        for (size_t i = 0; i < frame.size(); i++) {
+            out << frame[i];
+            if (i + 1 < frame.size()) out << ",";
+        }
+        out << "\n";
+    }
+    out.close();
 
     err = Pa_Terminate();
     if (err != paNoError) {

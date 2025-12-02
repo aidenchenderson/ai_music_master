@@ -10,7 +10,7 @@ BIN_DIR = bin
 # compiler flags & linker flags
 CXXFLAGS = -std=c++23 -Wall -I$(INCLUDE_DIR)
 # link portaudio, real time, alsa, and pthreads
-LDFLAGS = -lportaudio -lrt -lasound -pthread
+LDFLAGS = -lportaudio -lrt -lasound -pthread -lfftw3
 
 # list of all source files and their corresponding object files
 SRCS = $(wildcard $(SRC_DIR)/*.cpp)
