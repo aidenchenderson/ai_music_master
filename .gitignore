@@ -17,3 +17,7 @@
 /data_gathering/dataset/fma_medium
 /data_gathering/dataset/fma_spectrograms
 *.zip
+
+# system files
+.DS_Store
+__pycache__/
