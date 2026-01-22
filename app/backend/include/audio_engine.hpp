@@ -1,8 +1,12 @@
 #ifndef AUDIO_ENGINE_H
 #define AUDIO_ENGINE_H
 
-#include <cstring>
 #include "miniaudio.h"
+
+static constexpr ma_uint32 SAMPLE_RATE = 48000;     // 48khz 
+static constexpr ma_uint32 CHANNELS = 1;            // mono audio
+static constexpr ma_uint32 RECORD_SEC = 10;         // 10 seconds of recording
+static constexpr ma_uint32 CHUNK_FRAMES = 1024;     // audio samples to process at a time
 
 class AudioEngine {
 public:
@@ -10,28 +14,33 @@ public:
         success = 0,
         ring_buffer_failure = 1,
         device_failure = 2,
+        context_failure = 3,
     };
 
-    AudioEngine();
+    AudioEngine(ma_uint32 capture_device_index);
     ~AudioEngine();
 
     InitResult init();
     void start();
     void stop();
+    bool read_chunk(float* out, ma_uint32 frames);
 
     ma_pcm_rb* get_ring_buffer();
 
+private:
     static void data_callback(
-        ma_device*  device, 
-        void*       output, 
-        const void* input, 
-        ma_uint32   frame_count
+        ma_device* device,
+        void* output,
+        const void* input,
+        ma_uint32 frame_count
     );
 
 private:
-    ma_device audio_device;
-    ma_pcm_rb ring_buffer;
-    InitResult init_result;
+    ma_context context{};
+    ma_device audio_device{};
+    ma_pcm_rb ring_buffer{};
+    ma_uint32 device_index;
+    InitResult init_result = InitResult::context_failure;
 };
 
 #endif // AUDIO_ENGINE_H
