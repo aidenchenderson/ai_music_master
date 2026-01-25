@@ -31,9 +31,9 @@ void FeatureWriter::writeRow(std::vector<float> &features){
         throw std::runtime_error("File not open");
     }
     // Write features in separate collumns of a new row
-    for(int i = 0; i<features.size(); i++){
+    for(int i = 0; i < static_cast<int>(features.size()); i++){
         file << features[i];
-        if(i<features.size()-1){
+        if(i < static_cast<int>(features.size()-1)){
             file << ",";
         }
     }
