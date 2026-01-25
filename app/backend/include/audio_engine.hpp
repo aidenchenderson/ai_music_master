@@ -1,6 +1,9 @@
 #ifndef AUDIO_ENGINE_H
 #define AUDIO_ENGINE_H
 
+#include <string>
+#include <vector>
+
 #include "miniaudio.h"
 
 static constexpr ma_uint32 SAMPLE_RATE = 48000;     // 48khz 

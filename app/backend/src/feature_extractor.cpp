@@ -4,7 +4,7 @@
 
 #include "feature_extractor.hpp"
 
-// helper functions to convert between hertz and mel scale to match librosa
+
 inline float FeatureExtractor::hz_to_mel(float hz) {
     return 2595.0f * std::log10(1.0f + hz / 700.0f);
 }
@@ -30,14 +30,11 @@ FeatureExtractor::FeatureExtractor(const FeatureExtractorConfig& c) : config(c) 
 }
 
 
-// destroy the feature extractor and release all resources used
 FeatureExtractor::~FeatureExtractor() {
     free(fft_config);
 }
 
 
-// hann window: w[n] = 0.5 * (1 - cos(2*pi*n/(N-1)))
-// used to reduce spectral leakage
 void FeatureExtractor::build_hann_window() {
     for (uint32_t i = 0; i < config.chunk_size; ++i) {
         window[i] = 0.5f * (1.0f - std::cos(2.0f * M_PI * i / (config.chunk_size - 1)));
@@ -45,7 +42,6 @@ void FeatureExtractor::build_hann_window() {
 }
 
 
-// 
 void FeatureExtractor::build_mel_filterbank() {
     mel_filterbank.resize(config.num_mels);
 
@@ -54,28 +50,41 @@ void FeatureExtractor::build_mel_filterbank() {
 
     std::vector<float> mel_points(config.num_mels + 2);
     std::vector<int> bin_points(config.num_mels + 2);
+    int max_bin = config.fft_size / 2;
 
     for (uint32_t i = 0; i < config.num_mels + 2; ++i) {
         mel_points[i] = mel_min + i * (mel_max - mel_min) / (config.num_mels + 1);
         float hz = mel_to_hz(mel_points[i]);
-        bin_points[i] = static_cast<int>(std::floor((config.fft_size + 1) * hz / config.sample_rate));
+        bin_points[i] = std::min(max_bin, static_cast<int>(std::floor((config.fft_size + 1) * hz / config.sample_rate)));
     }
 
     for (uint32_t m = 1; m <= config.num_mels; ++m) {
         mel_filterbank[m - 1].assign(config.fft_size / 2 + 1, 0.0f);
 
+        if (bin_points[m - 1] == bin_points[m] || bin_points[m] == bin_points[m + 1]) {
+            continue;
+        }
+
         for (int k = bin_points[m - 1]; k < bin_points[m]; ++k) {
-            mel_filterbank[m - 1][k] = float(k - bin_points[m - 1]) / (bin_points[m] - bin_points[m - 1]);
+            mel_filterbank[m - 1][k] =
+                float(k - bin_points[m - 1]) / (bin_points[m] - bin_points[m - 1]);
         }
 
         for (int k = bin_points[m]; k < bin_points[m + 1]; ++k) {
-            mel_filterbank[m - 1][k] = float(bin_points[m + 1] - k) / (bin_points[m + 1] - bin_points[m]);
+            mel_filterbank[m - 1][k] =
+                float(bin_points[m + 1] - k) / (bin_points[m + 1] - bin_points[m]);
         }
     }
 }
 
 
+
 const std::vector<float>& FeatureExtractor::compute_mel_spectrogram(const float* audio_chunk) {
+    float audio_sum = 0.0f;
+    for (uint32_t i = 0; i < config.chunk_size; ++i)
+        audio_sum += std::abs(audio_chunk[i]);
+
+
     std::fill(fft_input.begin(), fft_input.end(), 0.0f);
     for (uint32_t i = 0; i < config.chunk_size; ++i) {
         fft_input[i] = audio_chunk[i] * window[i];
