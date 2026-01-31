@@ -19,10 +19,10 @@ BIN_DIR = bin
 CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS)
 CFLAGS = -Wall $(INCLUDE_PATHS)
 # linker flags
-LDFLAGS = -pthread -lfftw3 -ldl -lm
+LDFLAGS = -pthread -lfftw3 -ldl -lm -lncurses
 
 # source files
-CPP_SRCS = main.cpp $(wildcard $(BACKEND_DIR)/src/*.cpp) $(wildcard $(FRONTEND_DIR)/src/*.cpp)
+CPP_SRCS = src/main.cpp $(wildcard $(BACKEND_DIR)/src/*.cpp) $(wildcard $(FRONTEND_DIR)/src/*.cpp)
 C_SRCS = $(wildcard $(BACKEND_DIR)/kissfft/*.c)
 
 SRCS = $(CPP_SRCS) $(C_SRCS)
