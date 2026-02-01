@@ -18,7 +18,6 @@ PageResult runSoloStartPage(WINDOW* win, const UIContext& ctx) {
 
     while (true) {
         werase(win);
-        box(win, '|', '-');
 
         int listY = 9 * yWin / 28;
         int listX = 4;
