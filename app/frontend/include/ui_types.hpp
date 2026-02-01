@@ -33,6 +33,7 @@ enum class PageId {
 };
 
 struct UIContext {
+    int selectedDeviceIndex = -1;
     std::string selectedDevice;
     std::string selectedTrack;
     std::string trackFilename;

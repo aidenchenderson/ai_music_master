@@ -11,7 +11,6 @@ PageResult runSummaryPage(WINDOW* win, const UIContext& ctx) {
 
     while (true) {
         werase(win);
-        box(win, '|', '-');
 
         mvwprintw(win, yWin / 28, 2, "Session Summary");
         mvwprintw(win, 9 * yWin / 28, 2, "Mode: %s", ctx.playAlong ? "Play Along" : "Solo");

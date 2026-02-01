@@ -1,5 +1,6 @@
 #include <ncurses.h>
 #include <string>
+#include "audio_engine.hpp"
 #include "ui_controller.hpp"
 #include "ui_pages.hpp"
 #include "ui_types.hpp"
@@ -11,14 +12,15 @@ std::string runMainUI() {
     curs_set(0);
     keypad(stdscr, TRUE);
 
-    int yMax;
-    int xMax;
-    getmaxyx(stdscr, yMax, xMax);
-    WINDOW *win = newwin(9 * yMax / 14, xMax / 2, yMax / 4, xMax / 4);
+    int yMax = 15;
+    int xMax = 50;
+    
+    WINDOW *win = newwin(yMax, xMax, 0, 0); 
     keypad(win, TRUE);
 
     UIContext ctx;
     ctx.selectedDevice = "No device selected";
+    std::vector<std::string> capture_devices = AudioEngine::get_capture_devices();
 
     PageId current = PageId::MainMenu;
     while (current != PageId::Exit) {
@@ -28,7 +30,7 @@ std::string runMainUI() {
                 result = runMainMenuPage(win, ctx);
                 break;
             case PageId::DeviceSelect:
-                result = runDeviceSelectPage(win, ctx);
+                result = runDeviceSelectPage(win, ctx, capture_devices);
                 break;
             case PageId::PlayAlongList:
                 result = runPlayAlongListPage(win, ctx);

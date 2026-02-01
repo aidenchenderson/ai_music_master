@@ -3,39 +3,50 @@
 #include <vector>
 #include "ui_pages.hpp"
 
-PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx) {
-    std::vector<std::string> devices = {
-        "Device 1",
-        "Device 2",
-        "Device 3"
-    };
+static std::string shorten_device_name(const std::string& name, int maxWidth) {
+    if ((int)name.size() <= maxWidth) return name;
+    if (maxWidth <= 3) return name.substr(0, maxWidth);
+    return name.substr(0, maxWidth - 3) + "...";
+}
 
+PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx, const std::vector<std::string>& devices) {
     int highlighted = 0;
     int input = 0;
+    int scrollOffset = 0;
 
-    int yWin;
-    int xWin;
+    int yWin, xWin;
     getmaxyx(win, yWin, xWin);
+    (void)yWin;
+
+    int listTop = 3;
+    int visibleCount = std::min(7, (int)devices.size());
 
     while (true) {
         werase(win);
-        box(win, '|', '-');
 
-        int buttonY = 9 * yWin / 28;
-        int buttonX = 4;
+        for (int row = 0; row < visibleCount; ++row) {
+            int deviceIndex = scrollOffset + row;
+            if (deviceIndex >= (int)devices.size()) break;
 
-        for (size_t i = 0; i < devices.size(); i++) {
-            if ((int)i == highlighted) {
+            int y = listTop + row;
+            if (deviceIndex == highlighted) {
                 wattron(win, A_REVERSE);
             }
-            mvwprintw(win, buttonY + i * yWin / 7, buttonX, "[%s]", devices[i].c_str());
-            if ((int)i == highlighted) {
+
+            std::string label = shorten_device_name(devices[deviceIndex], xWin - 6);
+            mvwprintw(win, y, 4, "[%s]", label.c_str());
+
+            if (deviceIndex == highlighted) {
                 wattroff(win, A_REVERSE);
             }
         }
 
-        mvwprintw(win, yWin / 28, 2, "Select Device");
-        mvwprintw(win, 21 * yWin / 28, 2, "** ENTER to select, LEFT to go back **");
+        mvwprintw(win, 1, 2, "Select Device");
+        mvwprintw(win, 13, 2, "** ENTER to select, LEFT to go back **");
+
+        if (static_cast<int>(devices.size()) > visibleCount) {
+            mvwprintw(win, 11, 4, "Device %d-%d of %zu", scrollOffset + 1, std::min(scrollOffset + visibleCount, (int)devices.size()), devices.size());
+        }
 
         wrefresh(win);
         input = wgetch(win);
@@ -44,14 +55,21 @@ PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx) {
             case KEY_UP:
                 highlighted--;
                 if (highlighted < 0) highlighted = (int)devices.size() - 1;
+                if (highlighted < scrollOffset) {
+                    scrollOffset = highlighted;
+                }
                 break;
             case KEY_DOWN:
                 highlighted++;
                 if (highlighted >= (int)devices.size()) highlighted = 0;
+                if (highlighted >= scrollOffset + visibleCount) {
+                    scrollOffset = highlighted - visibleCount + 1;
+                }
                 break;
             case 10:
             case KEY_ENTER: {
                 UIContext nextCtx = ctx;
+                nextCtx.selectedDeviceIndex = highlighted;
                 nextCtx.selectedDevice = devices[highlighted];
                 return {PageId::MainMenu, nextCtx};
             }
