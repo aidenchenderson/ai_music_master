@@ -3,12 +3,15 @@
 
 #include <vector>
 #include <cstdint>
-#include "kiss_fftr.h"
+extern "C" {
+    #include "kiss_fftr.h"
+}
+
 
 
 struct FeatureExtractorConfig {
     uint32_t sample_rate = 48000;
-    uint32_t fft_size = 1024;
+    uint32_t fft_size = 2048;
     uint32_t hop_size = 512;
     uint32_t num_mels = 40;
 
@@ -27,11 +30,11 @@ public:
     ~FeatureExtractor();
 
     std::vector<std::vector<float>> process_samples(const float* input, uint32_t num_samples);
+    std::vector<float> compute_frame(const float* frame);
 
 private:
     void build_hann_window();
     void build_mel_filterbank();
-    std::vector<float> compute_frame(const float* frame);
 
     static float hz_to_mel(float hz);
     static float mel_to_hz(float mel);
