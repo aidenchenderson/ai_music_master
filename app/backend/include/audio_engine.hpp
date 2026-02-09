@@ -9,7 +9,7 @@
 static constexpr ma_uint32 SAMPLE_RATE = 48000;     // 48khz 
 static constexpr ma_uint32 CHANNELS = 1;            // mono audio
 static constexpr ma_uint32 RECORD_SEC = 10;         // 10 seconds of recording
-static constexpr ma_uint32 CHUNK_FRAMES = 1024;     // audio samples to process at a time
+static constexpr ma_uint32 CHUNK_FRAMES = 2048;     // audio samples to process at a time
 
 class AudioEngine {
 public:
