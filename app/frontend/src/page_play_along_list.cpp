@@ -8,13 +8,38 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
     std::vector<std::string> tracks = {
         "Track 01 - Blues Jam",
         "Track 02 - Rock Groove",
-        "Track 03 - Jazz Swing"
+        "Track 03 - Jazz Swing",
+        "Track 04 - Jazz midnight",
+        "Track 05 - Pop Groove",
+        "Track 06 - Rock Chug",
+        "Track 07 - 12-Bar Blues",
+        "Track 08 - Pop Bounce",
+        "Track 09 - Rock Skyline",
+        "Track 10 - Pop Neon Lights"
+
+
+
+
+
+
     };
     
     std::vector<std::string> filenames = {
         "data/tracks/blues_jam.json",
         "data/tracks/rock_groove.json",
-        "data/tracks/jazz_swing.json"
+        "data/tracks/jazz_swing.json",
+        "data/tracks/jazz_midnight.json",
+        "data/tracks/pop_loop.json",
+        "data/tracks/rock_chug.json",
+        "data/tracks/blues_12bar.json",
+        "data/tracks/pop_bounce.json",
+        "data/tracks/rock_skyline.json",
+        "data/tracks/pop_neon_lights.json"
+
+
+
+
+
     };
 
     int highlighted = 0;
