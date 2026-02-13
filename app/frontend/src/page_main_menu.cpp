@@ -74,4 +74,3 @@ PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx) {
         }
     }
 }
-

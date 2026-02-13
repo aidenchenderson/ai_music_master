@@ -1,63 +1,59 @@
 #include <ncurses.h>
 #include <string>
 #include <vector>
+#include <thread>
+#include <chrono>
+#include <cstring>
 #include "ui_pages.hpp"
 
-PageResult runSoloStartPage(WINDOW* win, const UIContext& ctx) {
-    std::vector<std::string> options = {
-        "Start",
-        "Back"
-    };
+PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx) {
+    SessionRecorder recorder(ctx.selectedDeviceIndex);
 
-    int highlighted = 0;
-    int input = 0;
+    if (!recorder.start()) {
+        return {PageId::Summary, ctx};
+    }
 
-    int yWin;
-    int xWin;
-    getmaxyx(win, yWin, xWin);
+    bool playing = true;
 
-    while (true) {
+    std::vector<std::vector<float>> collected_features;
+    collected_features.reserve(5000);
+
+    size_t frame_counter = 0;
+
+    while (playing) {
+        nodelay(win, TRUE);
+        int input = wgetch(win);
+        nodelay(win, FALSE);
+
+        if (input == 27) {
+            playing = false;
+        }
+
+        recorder.process_available_audio(
+            [&](const float* mel_frame) {
+                std::vector<float> frame(40);
+                std::memcpy(frame.data(), mel_frame, 40 * sizeof(float));
+
+                if (collected_features.size() < 5000) collected_features.push_back(std::move(frame));
+
+                frame_counter++;
+            }
+        );
+
         werase(win);
 
-        int listY = 9 * yWin / 28;
-        int listX = 4;
-
-        for (size_t i = 0; i < options.size(); i++) {
-            if ((int)i == highlighted) {
-                wattron(win, A_REVERSE);
-            }
-            mvwprintw(win, listY + i * yWin / 7, listX, "[%s]", options[i].c_str());
-            if ((int)i == highlighted) {
-                wattroff(win, A_REVERSE);
-            }
-        }
-
-        mvwprintw(win, yWin / 28, 2, "Solo Playing");
-        mvwprintw(win, 21 * yWin / 28, 2, "** ENTER to continue, LEFT to go back **");
+        mvwprintw(win, 2, 2, "Solo Mode - Recording...");
+        mvwprintw(win, 4, 2, "Press ESC to stop");
+        mvwprintw(win, 6, 2, "Frames processed: %zu", frame_counter);
+        mvwprintw(win, 7, 2, "Stored frames: %zu", collected_features.size());
 
         wrefresh(win);
-        input = wgetch(win);
 
-        switch (input) {
-            case KEY_UP:
-                highlighted--;
-                if (highlighted < 0) highlighted = (int)options.size() - 1;
-                break;
-            case KEY_DOWN:
-                highlighted++;
-                if (highlighted >= (int)options.size()) highlighted = 0;
-                break;
-            case 10:
-            case KEY_ENTER:
-                if (highlighted == 0) {
-                    UIContext nextCtx = ctx;
-                    nextCtx.playAlong = false;
-                    nextCtx.selectedTrack = "(solo session)";
-                    return {PageId::Summary, nextCtx};
-                }
-                return {PageId::MainMenu, ctx};
-            case KEY_LEFT:
-                return {PageId::MainMenu, ctx};
-        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
+
+    recorder.stop();
+
+    return {PageId::Summary, ctx};
 }
+

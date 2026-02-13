@@ -5,7 +5,7 @@
 #include "ui_pages.hpp"
 #include "ui_types.hpp"
 
-std::string runMainUI() {
+void runMainUI() {
     initscr();
     noecho();
     cbreak();
@@ -39,7 +39,7 @@ std::string runMainUI() {
                 result = runPlayAlongPlayerPage(win, ctx);
                 break;
             case PageId::SoloStart:
-                result = runSoloStartPage(win, ctx);
+                result = runSoloPlayerPage(win, ctx);
                 break;
             case PageId::Summary:
                 result = runSummaryPage(win, ctx);
@@ -54,6 +54,4 @@ std::string runMainUI() {
 
     delwin(win);
     endwin();
-
-    return ctx.selectedDevice;
 }
