@@ -8,8 +8,9 @@ CXX = g++
 # search paths
 BACKEND_DIR = backend
 FRONTEND_DIR = frontend
+CORE_DIR = core
 EXTERNAL_LIB_DIR = $(BACKEND_DIR)/lib
-INCLUDE_PATHS = -I. -I$(BACKEND_DIR)/include -I$(FRONTEND_DIR)/include -I$(EXTERNAL_LIB_DIR) -I$(BACKEND_DIR)/kissfft -I$(BACKEND_DIR)/lib
+INCLUDE_PATHS = -I. -I$(BACKEND_DIR)/include -I$(FRONTEND_DIR)/include -I$(EXTERNAL_LIB_DIR) -I$(BACKEND_DIR)/kissfft -I$(BACKEND_DIR)/lib -I$(CORE_DIR)
 
 # output directories
 BUILD_DIR = build
@@ -22,14 +23,14 @@ CFLAGS = -Wall $(INCLUDE_PATHS)
 LDFLAGS = -pthread -ldl -lm -lncurses
 
 # source files
-CPP_SRCS = src/main.cpp $(wildcard $(BACKEND_DIR)/src/*.cpp) $(wildcard $(FRONTEND_DIR)/src/*.cpp)
+CPP_SRCS = src/main.cpp $(wildcard $(BACKEND_DIR)/src/*.cpp) $(wildcard $(FRONTEND_DIR)/src/*.cpp) $(wildcard $(CORE_DIR)/*.cpp)
 C_SRCS = $(wildcard $(BACKEND_DIR)/kissfft/*.c)
 
 SRCS = $(CPP_SRCS) $(C_SRCS)
 
 # object files
-OBJS = $(SRCS:%.cpp=$(BUILD_DIR)/%.o)
-OBJS := $(OBJS:%.c=$(BUILD_DIR)/%.o)
+OBJS = $(CPP_SRCS:%.cpp=$(BUILD_DIR)/%.o)
+OBJS += $(C_SRCS:%.c=$(BUILD_DIR)/%.o)
 
 TARGET = $(BIN_DIR)/guitar_genre_guru
 
