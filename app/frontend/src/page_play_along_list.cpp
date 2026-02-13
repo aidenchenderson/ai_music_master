@@ -51,7 +51,6 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
 
     while (true) {
         werase(win);
-        box(win, '|', '-');
 
         int listY = 9 * yWin / 28;
         int listX = 4;
@@ -87,10 +86,8 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
                 nextCtx.selectedTrack = tracks[highlighted];
                 nextCtx.trackFilename = filenames[highlighted];
                 nextCtx.playAlong = true;
-                
-                // Load track data
+
                 if (!loadTrack(nextCtx.trackFilename, nextCtx.trackData)) {
-                    // Failed to load, stay on this page
                     continue;
                 }
                 
