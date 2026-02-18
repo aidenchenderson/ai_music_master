@@ -33,7 +33,7 @@ void RecordingSession::process() {
                 return;
             }
                 
-            std::vector<float> frame(40);
+            std::vector<float> frame(AudioConfig::NUM_MELS);
             std::memcpy(frame.data(), mel_frame, 40 * sizeof(float));
 
             allMelFrames.push_back(frame);

@@ -19,10 +19,8 @@ public:
 
     bool start();
     void stop();
-
     void process();
 
-    // Return by value to avoid lifetime / segfault issues
     std::vector<std::vector<float>> getAllMelFrames() const;
     std::vector<BeatFrameData> getBeatAlignedFrames() const;
 

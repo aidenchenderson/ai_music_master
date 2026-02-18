@@ -5,15 +5,17 @@
 #include <functional>
 #include <cstdint>
 
+#include "audio_config.hpp"
+
 extern "C" {
     #include "kiss_fftr.h"
 }
 
 struct FeatureExtractorConfig {
-    uint32_t sample_rate = 48000;
-    uint32_t fft_size = 2048;
-    uint32_t hop_size = 512;
-    uint32_t num_mels = 40;
+    uint32_t sample_rate = AudioConfig::SAMPLE_RATE;
+    uint32_t fft_size = AudioConfig::FFT_SIZE;
+    uint32_t hop_size = AudioConfig::HOP_SIZE;
+    uint32_t num_mels = AudioConfig::NUM_MELS;
 
     float fmin = 0.0f;
     float fmax = -1.0f;

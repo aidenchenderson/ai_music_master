@@ -70,12 +70,12 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
     bool playing = true;
 
     int beatDurationMs = 60000 / ctx.trackData.bpm;
-    auto lastBeatTime  = std::chrono::steady_clock::now();
+    auto lastBeatTime = std::chrono::steady_clock::now();
 
     const int tabStartX = 2;
     const int tabStartY = 3;
-    const int barWidth  = 22;
-    const int barGap    = barWidth;
+    const int barWidth = 22;
+    const int barGap = barWidth;
 
     while (playing)
     {
