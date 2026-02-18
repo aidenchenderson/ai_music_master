@@ -9,7 +9,7 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
         "Track 01 - Blues Jam",
         "Track 02 - Rock Groove",
         "Track 03 - Jazz Swing",
-        "Track 04 - Jazz midnight",
+        "Track 04 - Jazz Midnight",
         "Track 05 - Pop Groove",
         "Track 06 - Rock Chug",
         "Track 07 - 12-Bar Blues",
@@ -32,30 +32,37 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
     };
 
     int highlighted = 0;
+    int scrollOffset = 0;
     int input = 0;
 
-    int yWin;
-    int xWin;
+    int yWin, xWin;
     getmaxyx(win, yWin, xWin);
+
+    int listTop = 3;
+    int visibleCount = yWin - 8;  // leave space for header/footer
 
     while (true) {
         werase(win);
 
-        int listY = 9 * yWin / 28;
-        int listX = 4;
+        mvwprintw(win, 1, 2, "Play Along - Select a Track");
+        mvwprintw(win, yWin - 2, 2, "** ENTER to choose, LEFT to go back **");
 
-        for (size_t i = 0; i < tracks.size(); i++) {
-            if ((int)i == highlighted) {
+        for (int row = 0; row < visibleCount; ++row) {
+            int trackIndex = scrollOffset + row;
+            if (trackIndex >= (int)tracks.size()) break;
+
+            int y = listTop + row;
+
+            if (trackIndex == highlighted) {
                 wattron(win, A_REVERSE);
             }
-            mvwprintw(win, listY + i * yWin / 7, listX, "[%s]", tracks[i].c_str());
-            if ((int)i == highlighted) {
+
+            mvwprintw(win, y, 4, "[%s]", tracks[trackIndex].c_str());
+
+            if (trackIndex == highlighted) {
                 wattroff(win, A_REVERSE);
             }
         }
-
-        mvwprintw(win, yWin / 28, 2, "Play Along - Select a Track");
-        mvwprintw(win, 21 * yWin / 28, 2, "** ENTER to choose, LEFT to go back **");
 
         wrefresh(win);
         input = wgetch(win);
@@ -64,11 +71,21 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
             case KEY_UP:
                 highlighted--;
                 if (highlighted < 0) highlighted = (int)tracks.size() - 1;
+
+                if (highlighted < scrollOffset) {
+                    scrollOffset = highlighted;
+                }
                 break;
+
             case KEY_DOWN:
                 highlighted++;
                 if (highlighted >= (int)tracks.size()) highlighted = 0;
+
+                if (highlighted >= scrollOffset + visibleCount) {
+                    scrollOffset = highlighted - visibleCount + 1;
+                }
                 break;
+
             case 10:
             case KEY_ENTER: {
                 UIContext nextCtx = ctx;
@@ -82,6 +99,7 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
                 
                 return {PageId::PlayAlongPlayer, nextCtx};
             }
+
             case KEY_LEFT:
                 return {PageId::MainMenu, ctx};
         }
