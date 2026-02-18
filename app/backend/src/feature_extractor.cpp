@@ -171,28 +171,41 @@ void FeatureExtractor::compute_frame(const float* frame, float* out_mel) {
 }
 
 
-void FeatureExtractor::process_samples(const float* input, uint32_t num_samples, const FrameCallback& callback) {
-    // add incoming samples to circular buffer
+void FeatureExtractor::process_samples(
+    const float* input,
+    uint32_t num_samples,
+    const FrameCallback& callback)
+{
+    // Write incoming samples
     for (uint32_t i = 0; i < num_samples; ++i) {
         sample_buffer[write_pos] = input[i];
         write_pos = (write_pos + 1) % sample_buffer.size();
 
-        if (available_samples < sample_buffer.size()) {
+        if (available_samples < sample_buffer.size())
             available_samples++;
-        }
     }
 
-    // while enough samples are present, process frames
+    // Process while enough samples exist
     while (available_samples >= config.fft_size) {
-        size_t start = (write_pos + sample_buffer.size() - available_samples) % sample_buffer.size();
 
+        // Copy frame starting from read_pos
         for (uint32_t i = 0; i < config.fft_size; ++i) {
-            frame_buffer[i] = sample_buffer[(start + i) % sample_buffer.size()];
+            frame_buffer[i] =
+                sample_buffer[(read_pos + i) % sample_buffer.size()];
         }
 
         compute_frame(frame_buffer.data(), mel_buffer.data());
         callback(mel_buffer.data());
-        available_samples -= config.hop_size;
+
+        // Advance read head safely
+        read_pos = (read_pos + config.hop_size) % sample_buffer.size();
+
+        // Prevent unsigned underflow
+        if (available_samples >= config.hop_size)
+            available_samples -= config.hop_size;
+        else
+            available_samples = 0;
     }
 }
+
 

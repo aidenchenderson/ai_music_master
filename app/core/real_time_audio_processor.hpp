@@ -6,11 +6,11 @@
 #include "audio_engine.hpp"
 #include "feature_extractor.hpp"
 
-class SessionRecorder {
+class RealtimeAudioProcessor {
 public:
     using FrameCallback = std::function<void(const float* mel_frame)>;
 
-    SessionRecorder(int deviceIndex);
+    RealtimeAudioProcessor(int deviceIndex);
 
     bool start();
     void stop();

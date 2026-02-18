@@ -7,9 +7,9 @@
 #include "ui_pages.hpp"
 
 PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx) {
-    SessionRecorder recorder(ctx.selectedDeviceIndex);
+    RealtimeAudioProcessor audio_processor(ctx.selectedDeviceIndex);
 
-    if (!recorder.start()) {
+    if (!audio_processor.start()) {
         return {PageId::Summary, ctx};
     }
 
@@ -29,7 +29,7 @@ PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx) {
             playing = false;
         }
 
-        recorder.process_available_audio(
+        audio_processor.process_available_audio(
             [&](const float* mel_frame) {
                 std::vector<float> frame(40);
                 std::memcpy(frame.data(), mel_frame, 40 * sizeof(float));
@@ -52,7 +52,7 @@ PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    recorder.stop();
+    audio_processor.stop();
 
     return {PageId::Summary, ctx};
 }

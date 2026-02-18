@@ -37,6 +37,7 @@ struct UIContext {
     std::string selectedDevice;
     std::string selectedTrack;
     std::string trackFilename;
+    std::vector<std::vector<float>> lastSessionFeatures;
     Track trackData;
     bool playAlong = false;
 };

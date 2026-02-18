@@ -16,12 +16,6 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
         "Track 08 - Pop Bounce",
         "Track 09 - Rock Skyline",
         "Track 10 - Pop Neon Lights"
-
-
-
-
-
-
     };
     
     std::vector<std::string> filenames = {
@@ -35,11 +29,6 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
         "data/tracks/pop_bounce.json",
         "data/tracks/rock_skyline.json",
         "data/tracks/pop_neon_lights.json"
-
-
-
-
-
     };
 
     int highlighted = 0;

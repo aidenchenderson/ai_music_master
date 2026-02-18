@@ -4,6 +4,8 @@
 #include <thread>
 #include <iostream>
 #include "ui_pages.hpp"
+#include "recording_session.hpp"
+#include "feature_writer.hpp"
 
 void renderTabBar(WINDOW* win, const Bar& bar, int startX, int startY) {
     const char* strings[] = {"e", "B", "G", "D", "A", "E"};
@@ -37,35 +39,24 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
     if (ctx.selectedDeviceIndex < 0) {
         werase(win);
         mvwprintw(win, 2, 2, "No capture device selected.");
-        mvwprintw(win, 4, 2, "Go to 'Change Capture Devices' first.");
-        mvwprintw(win, 6, 2, "Press any key...");
-        wrefresh(win);
-        wgetch(win);
-        return {PageId::MainMenu, ctx};
-    }
-
-    if (ctx.trackData.bpm <= 0) {
-        werase(win);
-        mvwprintw(win, 2, 2, "Invalid BPM in track.");
         mvwprintw(win, 4, 2, "Press any key...");
         wrefresh(win);
         wgetch(win);
         return {PageId::MainMenu, ctx};
     }
 
-    if (ctx.trackData.bars.empty()) {
+    if (ctx.trackData.bpm <= 0 || ctx.trackData.bars.empty()) {
         werase(win);
-        mvwprintw(win, 2, 2, "Track has no bars loaded.");
-        mvwprintw(win, 4, 2, "Check JSON parsing.");
-        mvwprintw(win, 6, 2, "Press any key...");
+        mvwprintw(win, 2, 2, "Invalid track data.");
+        mvwprintw(win, 4, 2, "Press any key...");
         wrefresh(win);
         wgetch(win);
         return {PageId::MainMenu, ctx};
     }
 
-    SessionRecorder recorder(ctx.selectedDeviceIndex);
+    RecordingSession session(ctx.selectedDeviceIndex, ctx.trackData.bpm);
 
-    if (!recorder.start()) {
+    if (!session.start()) {
         werase(win);
         mvwprintw(win, 2, 2, "Audio engine failed to start.");
         mvwprintw(win, 4, 2, "Press any key...");
@@ -73,9 +64,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
         wgetch(win);
         return {PageId::MainMenu, ctx};
     }
-
-    int yWin, xWin;
-    getmaxyx(win, yWin, xWin);
 
     int currentBar = -2;
     int currentBeat = 1;
@@ -89,8 +77,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
     const int barWidth  = 22;
     const int barGap    = barWidth;
 
-    size_t frameCounter = 0;
-
     while (playing)
     {
         nodelay(win, TRUE);
@@ -102,11 +88,7 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
             break;
         }
 
-        recorder.process_available_audio(
-            [&](const float* mel_frame) {
-                frameCounter++;
-            }
-        );
+        session.process();
 
         werase(win);
 
@@ -117,8 +99,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
         } else {
             mvwprintw(win, 0, 2, "BPM:%d  Bar:%d/%zu", ctx.trackData.bpm, currentBar + 1, ctx.trackData.bars.size());
         }
-
-        mvwprintw(win, 1, 2, "Audio Frames: %zu", frameCounter);
 
         int leftBar  = currentBar;
         int rightBar = currentBar + 1;
@@ -146,7 +126,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
 
         wrefresh(win);
 
-        // timer
         auto now = std::chrono::steady_clock::now();
         auto elapsed =
             std::chrono::duration_cast<std::chrono::milliseconds>(
@@ -170,7 +149,19 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
-    recorder.stop();
+    session.stop();
 
-    return {PageId::Summary, ctx};
+    auto frames = session.getAllMelFrames();
+
+    if (!frames.empty()) {
+        FeatureWriter writer("data/sessions/last_playalong_session.csv");
+        writer.open_file(true, frames[0].size());
+        writer.write_all(frames);
+        writer.close_file();
+    }
+
+    UIContext nextCtx = ctx;
+    nextCtx.lastSessionFeatures = session.getAllMelFrames();
+
+    return {PageId::Summary, nextCtx};
 }

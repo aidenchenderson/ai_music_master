@@ -2,16 +2,16 @@
 #include <vector>
 #include <functional>
 
-#include "session_recorder.hpp"
+#include "real_time_audio_processor.hpp"
 
 
-SessionRecorder::SessionRecorder(int deviceIndex) : engine(deviceIndex), extractor(FeatureExtractorConfig()) {
+RealtimeAudioProcessor::RealtimeAudioProcessor(int deviceIndex) : engine(deviceIndex), extractor(FeatureExtractorConfig()) {
     // preallocate buffer for pulling from audio engine ring buffer
     chunk_buffer.resize(CHUNK_FRAMES);
 }
 
 
-bool SessionRecorder::start() {
+bool RealtimeAudioProcessor::start() {
     // avoid reinitializing the engine
     if (running) { 
         return true;
@@ -30,7 +30,7 @@ bool SessionRecorder::start() {
 }
 
 
-void SessionRecorder::stop() {
+void RealtimeAudioProcessor::stop() {
     // avoid redundant stop calls
     if (!running) {
         return;
@@ -41,14 +41,19 @@ void SessionRecorder::stop() {
 }
 
 
-void SessionRecorder::process_available_audio(const FrameCallback& callback) {
+void RealtimeAudioProcessor::process_available_audio(const FrameCallback& callback) {
     if (!running) {
         return;
     }
 
     // drain available audio chunks from the ring buffer
-    while (engine.read_chunk(chunk_buffer.data(), CHUNK_FRAMES)) {
-        extractor.process_samples(chunk_buffer.data(), CHUNK_FRAMES, callback);
+    while (true) {
+        ma_uint32 frames_read = CHUNK_FRAMES;
+
+        if (!engine.read_chunk(chunk_buffer.data(), frames_read)) {
+            break;
+        }
+
+        extractor.process_samples(chunk_buffer.data(), frames_read, callback);
     }
 }
-

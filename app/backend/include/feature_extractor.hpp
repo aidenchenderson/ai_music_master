@@ -59,6 +59,7 @@ private:
     std::vector<float> mel_buffer;
 
     size_t write_pos = 0;
+    size_t read_pos = 0;
     size_t available_samples = 0;
 
     kiss_fftr_cfg fft_config = nullptr;
