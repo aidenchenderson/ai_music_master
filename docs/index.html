@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta name="viewport" content="width=device-width ,initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <title>AI Music Master</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="icon" type="image/xml" href="assets/logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+<body>
+  <header class="topBar">
+    <div class="topBarContainer">
+      <img class="logo" src="assets/logoMcAI.svg" alt="logoMcAI">
+      <h1 class="topBarHeader">- AI Music Master -</h1>
+      <button id="darkModeSwitch" class="toggle" type="button">
+        <i class="fa-solid fa-circle-half-stroke"></i>
+      </button>
+    </div>
+  </header>
+  <main class="page">
+    <div class="pageContainer">
+      <section class="section">
+        <div class="grid">
+          <div class="gridBox">
+            <h2 class="infoTitle">Project Information:</h2>
+            <p class="info">
+              Beginner guitarists often find it difficult to apply music theory while practicing. AI Music Master helps bridge that gap by giving real-time, beginner-friendly feedback during play. <br>
+
+               <br>
+                - Captures live guitar audio<br>
+                - Extracts musical features <br>
+                - Uses a terminal UI for user interaction<br>
+                - CNN analyzes freestyle playing<br>
+                - LLM provides guided learning feedback<br>
+
+            </p>
+          </div>
+          <div class="gridBox">
+            <div class="slideshow">
+              <button id="prevBtn" class="slideBtn prev" type="button">
+                &#8249;
+
+              </button>
+              <img id="slideImage" class="slideshowImg" alt="slide Image"/>
+            
+              <button id="nextBtn" class="slideBtn next" type="button">
+                &#8250;
+              </button>
+
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
