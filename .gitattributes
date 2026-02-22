@@ -1,3 +1,4 @@
 app/backend/lib/* linguist-vendored
 app/backend/kissfft/* linguist-vendored
+app/core/lib/* linguist-vendored
 *.csv linguist-generated
