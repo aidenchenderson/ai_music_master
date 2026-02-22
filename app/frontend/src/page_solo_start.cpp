@@ -26,8 +26,7 @@ PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx) {
 
     while (true) {
         auto now = std::chrono::high_resolution_clock::now();
-        double elapsed =
-            std::chrono::duration<double>(now - start_time).count();
+        double elapsed = std::chrono::duration<double>(now - start_time).count();
 
         if (elapsed >= RECORD_SECONDS) {
             break;

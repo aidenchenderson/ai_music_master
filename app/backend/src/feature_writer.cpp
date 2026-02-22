@@ -1,10 +1,7 @@
 #include "feature_writer.hpp"
 #include <stdexcept>
 
-FeatureWriter::FeatureWriter(const std::string& file_path)
-    : file_path(file_path)
-{
-}
+FeatureWriter::FeatureWriter(const std::string& file_path) : file_path(file_path) {}
 
 FeatureWriter::~FeatureWriter() {
     close_file();
@@ -20,8 +17,9 @@ void FeatureWriter::open_file(bool write_header, size_t feature_count) {
     if (write_header && feature_count > 0) {
         for (size_t i = 0; i < feature_count; ++i) {
             file << "f" << i;
-            if (i < feature_count - 1)
+            if (i < feature_count - 1) {
                 file << ",";
+            }
         }
         file << "\n";
     }
@@ -34,8 +32,9 @@ void FeatureWriter::write_row(const std::vector<float>& features) {
 
     for (size_t i = 0; i < features.size(); ++i) {
         file << features[i];
-        if (i < features.size() - 1)
+        if (i < features.size() - 1) {
             file << ",";
+        }
     }
 
     file << "\n";
