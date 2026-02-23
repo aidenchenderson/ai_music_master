@@ -1,8 +1,11 @@
 #include <ncurses.h>
 #include <string>
-#include "ui_pages.hpp"
 
-PageResult runSummaryPage(WINDOW* win, const UIContext& ctx) {
+#include "ui_pages.hpp"
+#include "ui_controller.hpp"
+#include "gpio_buttons.hpp"
+
+PageResult runSummaryPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_buttons) {
     int input = 0;
 
     int yWin;
@@ -19,7 +22,7 @@ PageResult runSummaryPage(WINDOW* win, const UIContext& ctx) {
         mvwprintw(win, 21 * yWin / 28, 2, "** Press ENTER to return **");
 
         wrefresh(win);
-        input = wgetch(win);
+        input = getInput(win, gpio_buttons);
         if (input == 10 || input == KEY_ENTER) {
             return {PageId::MainMenu, ctx};
         }

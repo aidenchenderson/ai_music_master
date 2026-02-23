@@ -4,5 +4,6 @@
 #include <string>
 
 void runMainUI();
+int getInput(WINDOW* win, GPIOButtons& buttons);
 
 #endif // UI_CONTROLLER_HPP

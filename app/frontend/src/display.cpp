@@ -31,29 +31,31 @@ void runMainUI() {
     PageId current = PageId::MainMenu;
     while (current != PageId::Exit) {
         PageResult result;
+
         switch (current) {
             case PageId::MainMenu:
-                result = runMainMenuPage(win, ctx);
+                result = runMainMenuPage(win, ctx, buttons);
                 break;
             case PageId::DeviceSelect:
-                result = runDeviceSelectPage(win, ctx, capture_devices);
+                result = runDeviceSelectPage(win, ctx, capture_devices, buttons);
                 break;
             case PageId::PlayAlongList:
-                result = runPlayAlongListPage(win, ctx);
+                result = runPlayAlongListPage(win, ctx, buttons);
                 break;
             case PageId::PlayAlongPlayer:
-                result = runPlayAlongPlayerPage(win, ctx);
+                result = runPlayAlongPlayerPage(win, ctx, buttons);
                 break;
             case PageId::SoloStart:
-                result = runSoloPlayerPage(win, ctx);
+                result = runSoloPlayerPage(win, ctx, buttons);
                 break;
             case PageId::Summary:
-                result = runSummaryPage(win, ctx);
+                result = runSummaryPage(win, ctx, buttons);
                 break;
             case PageId::Exit:
                 result = {PageId::Exit, ctx};
                 break;
         }
+
         ctx = result.context;
         current = result.nextPage;
     }
@@ -61,4 +63,13 @@ void runMainUI() {
     delwin(win);
     buttons.stop();
     endwin();
+}
+
+int getInput(WINDOW* win, GPIOButtons& buttons) {
+    int hw = buttons.getKey();
+    if (hw != -1) {
+        ungetch(hw);
+    }
+
+    return wgetch(win);
 }

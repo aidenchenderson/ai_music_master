@@ -2,8 +2,10 @@
 #include <string>
 #include <vector>
 #include "ui_pages.hpp"
+#include "ui_controller.hpp"
+#include "gpio_buttons.hpp"
 
-PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx) {
+PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_buttons) {
     std::vector<std::string> buttons = {
         "Play Along",
         "Freestyle Mode",
@@ -42,7 +44,7 @@ PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx) {
         mvwprintw(win, 13, 2, "Selected device index: %d", ctx.selectedDeviceIndex);
 
         wrefresh(win);
-        input = wgetch(win);
+        input = getInput(win, gpio_buttons);
 
         switch (input) {
             case KEY_UP:

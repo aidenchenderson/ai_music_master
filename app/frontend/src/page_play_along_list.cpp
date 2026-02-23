@@ -2,9 +2,11 @@
 #include <string>
 #include <vector>
 #include "ui_pages.hpp"
+#include "ui_controller.hpp"
 #include "track_loader.hpp"
+#include "gpio_buttons.hpp"
 
-PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
+PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_buttons) {
     std::vector<std::string> tracks = {
         "Track 01 - Blues Jam",
         "Track 02 - Rock Groove",
@@ -65,7 +67,7 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx) {
         }
 
         wrefresh(win);
-        input = wgetch(win);
+        input = getInput(win, gpio_buttons);
 
         switch (input) {
             case KEY_UP:

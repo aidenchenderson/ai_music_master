@@ -6,6 +6,7 @@
 #include "ui_pages.hpp"
 #include "recording_session.hpp"
 #include "feature_writer.hpp"
+#include "gpio_buttons.hpp"
 
 void renderTabBar(WINDOW* win, const Bar& bar, int startX, int startY) {
     const char* strings[] = {"e", "B", "G", "D", "A", "E"};
@@ -35,7 +36,7 @@ void renderEndBar(WINDOW* win, int startX, int startY) {
     mvwprintw(win, startY + 2, startX + 8, "E N D");
 }
 
-PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
+PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_buttons) {
     if (ctx.selectedDeviceIndex < 0) {
         werase(win);
         mvwprintw(win, 2, 2, "No capture device selected.");
@@ -77,12 +78,18 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx) {
     const int barWidth = 22;
     const int barGap = barWidth;
 
-    while (playing)
-    {
+    while (playing) {
         nodelay(win, TRUE);
-        int input = wgetch(win);
-        nodelay(win, FALSE);
 
+        int hw = gpio_buttons.getKey();
+        if (hw != -1) {
+            ungetch(hw);
+        }
+
+        int input = wgetch(win);
+
+        nodelay(win, FALSE);
+        
         if (input == 27) {
             playing = false;
             break;

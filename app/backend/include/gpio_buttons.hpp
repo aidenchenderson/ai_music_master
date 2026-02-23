@@ -12,11 +12,14 @@ public:
     void start();
     void stop();
 
+    int getKey();
+
 private:
     void run();
 
     std::thread worker;
     std::atomic<bool> running{false};
+    std::atomic<int> pending_key{-1};
 };
 
-#endif // GPIO_BUTTONS_H
+#endif
