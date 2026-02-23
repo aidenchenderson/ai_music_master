@@ -98,28 +98,19 @@ void AudioEngine::data_callback(ma_device *device, void *output, const void *inp
 }
 
 
-bool AudioEngine::read_chunk(float* out, ma_uint32 frames) {
-    ma_uint32 available = frames;
+bool AudioEngine::read_chunk(float* out, ma_uint32 max_frames) {
+    ma_uint32 available = max_frames;
     float* src = nullptr;
 
     ma_result res = ma_pcm_rb_acquire_read(&ring_buffer, &available, (void**)&src);
 
-    // audio data acquisition failed
-    if (res != MA_SUCCESS) {
+    if (res != MA_SUCCESS || available == 0) {
         return false;
     }
 
-    // release of partial reads
-    if (available < frames) {
-        if (available > 0) {
-            ma_pcm_rb_commit_read(&ring_buffer, available);
-        }
-        return false;
-    }
-
-    // copy the full chunk of audio data
-    memcpy(out, src, frames * sizeof(float));
-    ma_pcm_rb_commit_read(&ring_buffer, frames);
+    // Copy whatever is available
+    memcpy(out, src, available * sizeof(float));
+    ma_pcm_rb_commit_read(&ring_buffer, available);
 
     return true;
 }

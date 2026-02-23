@@ -39,7 +39,7 @@ PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx) {
         mvwprintw(win, 1, 2, "AI-Music-Master");
         wattroff(win, A_BOLD);
         mvwprintw(win, 12, 2, "** Use UP/DOWN and SELECT **");
-        mvwprintw(win, 13, 2, "Current device: %s", ctx.selectedDevice.c_str());
+        mvwprintw(win, 13, 2, "Selected device index: %d", ctx.selectedDeviceIndex);
 
         wrefresh(win);
         input = wgetch(win);

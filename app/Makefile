@@ -10,7 +10,13 @@ BACKEND_DIR = backend
 FRONTEND_DIR = frontend
 CORE_DIR = core
 EXTERNAL_LIB_DIR = $(BACKEND_DIR)/lib
-INCLUDE_PATHS = -I. -I$(BACKEND_DIR)/include -I$(FRONTEND_DIR)/include -I$(EXTERNAL_LIB_DIR) -I$(BACKEND_DIR)/kissfft -I$(BACKEND_DIR)/lib -I$(CORE_DIR)
+INCLUDE_PATHS = \
+	-I. \
+	-I$(BACKEND_DIR)/include \
+	-I$(FRONTEND_DIR)/include \
+	-I$(EXTERNAL_LIB_DIR) \
+	-I$(BACKEND_DIR)/kissfft \
+	-I$(CORE_DIR)
 
 # output directories
 BUILD_DIR = build
@@ -23,7 +29,12 @@ CFLAGS = -Wall $(INCLUDE_PATHS)
 LDFLAGS = -pthread -ldl -lm -lncurses $(shell pkg-config --libs libgpiod)
 
 # source files
-CPP_SRCS = src/main.cpp $(wildcard $(BACKEND_DIR)/src/*.cpp) $(wildcard $(FRONTEND_DIR)/src/*.cpp) $(wildcard $(CORE_DIR)/*.cpp)
+CPP_SRCS = \
+	src/main.cpp \
+	$(wildcard $(BACKEND_DIR)/src/*.cpp) \
+	$(wildcard $(FRONTEND_DIR)/src/*.cpp) \
+	$(wildcard $(CORE_DIR)/*.cpp)
+
 C_SRCS = $(wildcard $(BACKEND_DIR)/kissfft/*.c)
 
 SRCS = $(CPP_SRCS) $(C_SRCS)

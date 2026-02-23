@@ -4,12 +4,13 @@
 #include <string>
 #include <vector>
 
+#include "audio_config.hpp"
 #include "miniaudio.h"
 
-static constexpr ma_uint32 SAMPLE_RATE = 48000;     // 48khz 
-static constexpr ma_uint32 CHANNELS = 1;            // mono audio
-static constexpr ma_uint32 RECORD_SEC = 10;         // 10 seconds of recording
-static constexpr ma_uint32 CHUNK_FRAMES = 2048;     // audio samples to process at a time
+static constexpr ma_uint32 SAMPLE_RATE = AudioConfig::SAMPLE_RATE; 
+static constexpr ma_uint32 CHANNELS = 1;
+static constexpr ma_uint32 RECORD_SEC = 10;
+static constexpr ma_uint32 CHUNK_FRAMES = 2048;
 
 class AudioEngine {
 public:
