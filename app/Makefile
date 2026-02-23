@@ -20,7 +20,7 @@ BIN_DIR = bin
 CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS)
 CFLAGS = -Wall $(INCLUDE_PATHS)
 # linker flags
-LDFLAGS = -pthread -ldl -lm -lncurses
+LDFLAGS = -pthread -ldl -lm -lncurses -lgpiodcpp
 
 # source files
 CPP_SRCS = src/main.cpp $(wildcard $(BACKEND_DIR)/src/*.cpp) $(wildcard $(FRONTEND_DIR)/src/*.cpp) $(wildcard $(CORE_DIR)/*.cpp)

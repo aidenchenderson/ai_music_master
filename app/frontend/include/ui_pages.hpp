@@ -2,7 +2,7 @@
 #define UI_PAGES_HPP
 
 #include <ncurses.h>
-#include "session_recorder.hpp"
+//#include "session_recorder.hpp"
 #include "ui_types.hpp"
 
 PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx);

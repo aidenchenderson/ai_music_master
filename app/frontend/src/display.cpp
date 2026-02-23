@@ -4,6 +4,7 @@
 #include "ui_controller.hpp"
 #include "ui_pages.hpp"
 #include "ui_types.hpp"
+#include "gpio_buttons.hpp"
 
 void runMainUI() {
     initscr();
@@ -11,6 +12,9 @@ void runMainUI() {
     cbreak();
     curs_set(0);
     keypad(stdscr, TRUE);
+
+    GPIOButtons buttons;
+    buttons.start();
 
     int yMax = 15;
     int xMax = 50;
@@ -53,5 +57,6 @@ void runMainUI() {
     }
 
     delwin(win);
+    buttons.stop();
     endwin();
 }
