@@ -2,6 +2,8 @@
 #include <string>
 #include <vector>
 #include "ui_pages.hpp"
+#include "ui_controller.hpp"
+#include "gpio_buttons.hpp"
 
 static std::string clean_device_name(std::string name) {
     const std::vector<std::string> prefixes = {
@@ -31,7 +33,7 @@ static std::string shorten_device_name(const std::string& name, int maxWidth) {
 }
 
 
-PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx, const std::vector<std::string>& devices) {
+PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx, const std::vector<std::string>& devices, GPIOButtons& gpio_buttons) {
     int highlighted = 0;
     int input = 0;
     int scrollOffset = 0;
@@ -71,7 +73,7 @@ PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx, const std::vec
         }
 
         wrefresh(win);
-        input = wgetch(win);
+        input = getInput(win, gpio_buttons);
 
         switch (input) {
             case KEY_UP:

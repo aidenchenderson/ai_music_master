@@ -8,8 +8,9 @@
 #include "ui_pages.hpp"
 #include "feature_writer.hpp"
 #include "audio_config.hpp"
+#include "gpio_buttons.hpp"
 
-PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx) {
+PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_buttons) {
     RealtimeAudioProcessor audio_processor(ctx.selectedDeviceIndex);
 
     if (!audio_processor.start()) {
