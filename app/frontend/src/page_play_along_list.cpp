@@ -41,9 +41,9 @@ PageResult runPlayAlongListPage(WINDOW* win, const UIContext& ctx, GPIOButtons& 
     getmaxyx(win, yWin, xWin);
 
     int listTop = 3;
-    int visibleCount = yWin - 8;  // leave space for header/footer
+    int visibleCount = yWin - 8;
 
-    while (true) {
+    while (true) {  
         werase(win);
 
         mvwprintw(win, 1, 2, "Play Along - Select a Track");

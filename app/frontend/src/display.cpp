@@ -21,6 +21,7 @@ void runMainUI() {
     
     WINDOW *win = newwin(yMax, xMax, 0, 0); 
     keypad(win, TRUE);
+    nodelay(win, TRUE);
 
     wbkgd(win, A_BOLD);
 
@@ -67,9 +68,7 @@ void runMainUI() {
 
 int getInput(WINDOW* win, GPIOButtons& buttons) {
     int hw = buttons.getKey();
-    if (hw != -1) {
-        ungetch(hw);
-    }
+    if (hw != -1) return hw;
 
     return wgetch(win);
 }
