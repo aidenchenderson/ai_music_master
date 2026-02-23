@@ -1,4 +1,5 @@
 #include "recording_session.hpp"
+#include "audio_config.hpp"
 #include <cstring>
 
 RecordingSession::RecordingSession(int deviceIndex, int bpm_) : audio_processor(deviceIndex), bpm(bpm_) {
@@ -13,6 +14,7 @@ bool RecordingSession::start() {
 
     running = true;
     startTime = std::chrono::steady_clock::now();
+    lastRecordedBeat = -1;
 
     return true;
 }
@@ -28,13 +30,14 @@ void RecordingSession::process() {
     }
 
     audio_processor.process_available_audio(
-        [&](const float* mel_frame) {
+        [&](const float* mel_frame)
+        {
             if (!running) {
                 return;
             }
-                
+
             std::vector<float> frame(AudioConfig::NUM_MELS);
-            std::memcpy(frame.data(), mel_frame, 40 * sizeof(float));
+            std::memcpy(frame.data(), mel_frame, AudioConfig::NUM_MELS * sizeof(float));
 
             allMelFrames.push_back(frame);
 
@@ -42,10 +45,16 @@ void RecordingSession::process() {
             auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - startTime).count();
 
             int totalBeats = elapsedMs / beatDurationMs;
+
             int beatIndex = (totalBeats % 4) + 1;
             int barIndex  = totalBeats / 4;
 
-            beatFrames.push_back({barIndex, beatIndex, frame});
+            int absoluteBeat = barIndex * 4 + (beatIndex - 1);
+
+            if (absoluteBeat != lastRecordedBeat) {
+                beatFrames.push_back({barIndex, beatIndex, frame});
+                lastRecordedBeat = absoluteBeat;
+            }
         }
     );
 }
@@ -54,6 +63,6 @@ std::vector<std::vector<float>> RecordingSession::getAllMelFrames() const {
     return allMelFrames;
 }
 
-std::vector<BeatFrameData> RecordingSession::getBeatAlignedFrames() const {
+std::vector<BeatAlignedMelFrame> RecordingSession::getBeatAlignedFrames() const {
     return beatFrames;
 }

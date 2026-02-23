@@ -7,7 +7,7 @@
 #include "real_time_audio_processor.hpp"
 #include "ui_types.hpp"
 
-struct BeatFrameData {
+struct BeatAlignedMelFrame {
     int barIndex;
     int beatIndex;
     std::vector<float> melFrame;
@@ -22,7 +22,7 @@ public:
     void process();
 
     std::vector<std::vector<float>> getAllMelFrames() const;
-    std::vector<BeatFrameData> getBeatAlignedFrames() const;
+    std::vector<BeatAlignedMelFrame> getBeatAlignedFrames() const;
 
 private:
     RealtimeAudioProcessor audio_processor;
@@ -35,7 +35,9 @@ private:
     std::atomic<bool> running{false};
 
     std::vector<std::vector<float>> allMelFrames;
-    std::vector<BeatFrameData> beatFrames;
+    std::vector<BeatAlignedMelFrame> beatFrames;
+
+    int lastRecordedBeat = -1;
 };
 
 #endif // RECORDING_SESSION_HPP

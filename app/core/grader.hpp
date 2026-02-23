@@ -2,26 +2,8 @@
 #define GRADER_H
 
 #include <vector>
-#include <cmath>
-#include <map>
-
 #include "beat_data.hpp"
-
-// the expected data for the user to play
-struct Note {
-    int beat;
-    int string_index;
-    int fret;
-};
-
-struct Bar {
-    std::vector<Note> notes;
-};
-
-struct Track {
-    int bpm;
-    std::vector<Bar> bars;
-};
+#include "ui_types.hpp"
 
 // grade for a single beat
 struct BeatGrade {
@@ -33,18 +15,21 @@ struct BeatGrade {
     float score;
 };
 
-// (final) grade for the entire session
+// final grade for entire session
 struct SessionGrade {
-    float overall_score;
-    float timing_score;
-    float pitch_score;
-    float consistency_score;
+    float overall_score = 0.0f;
+    float timing_score = 0.0f;
+    float pitch_score = 0.0f;
+    float consistency_score = 0.0f;
     std::vector<BeatGrade> beat_grades;
 };
 
 class PlayAlongGrader {
 public:
-    static SessionGrade grade_session(const Track& track, const std::vector<BeatFrameData>& recordedBeats);
+    static SessionGrade grade_session(
+        const Track& track,
+        const std::vector<BeatFrameData>& recordedBeats
+    );
 
 private:
     static float get_expected_frequency(int stringIndex, int fret);
