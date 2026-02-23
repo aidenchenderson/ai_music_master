@@ -3,11 +3,33 @@
 #include <vector>
 #include "ui_pages.hpp"
 
-static std::string shorten_device_name(const std::string& name, int maxWidth) {
-    if ((int)name.size() <= maxWidth) return name;
-    if (maxWidth <= 3) return name.substr(0, maxWidth);
-    return name.substr(0, maxWidth - 3) + "...";
+static std::string clean_device_name(std::string name) {
+    const std::vector<std::string> prefixes = {
+        "Monitor of ",
+        "Built-in Audio ",
+        "USB Audio Device - ",
+        "alsa_output.",
+        "alsa_input.",
+        "sysdefault:",
+        "default:"
+    };
+
+    for (const auto& prefix : prefixes) {
+        if (name.rfind(prefix, 0) == 0) {
+            name = name.substr(prefix.length());
+        }
+    }
+
+    return name;
 }
+
+static std::string shorten_device_name(const std::string& name, int maxWidth) {
+    std::string cleaned = clean_device_name(name);
+    if ((int)cleaned.size() <= maxWidth) return cleaned;
+    if (maxWidth <= 3) return cleaned.substr(cleaned.size() - maxWidth);
+    return "..." + cleaned.substr(cleaned.size() - (maxWidth - 3));
+}
+
 
 PageResult runDeviceSelectPage(WINDOW* win, const UIContext& ctx, const std::vector<std::string>& devices) {
     int highlighted = 0;

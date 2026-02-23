@@ -18,6 +18,8 @@ void runMainUI() {
     WINDOW *win = newwin(yMax, xMax, 0, 0); 
     keypad(win, TRUE);
 
+    wbkgd(win, A_BOLD);
+
     UIContext ctx;
     ctx.selectedDevice = "No device selected";
     std::vector<std::string> capture_devices = AudioEngine::get_capture_devices();
