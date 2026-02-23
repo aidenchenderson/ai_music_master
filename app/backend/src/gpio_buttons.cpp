@@ -1,5 +1,6 @@
 #include "gpio_buttons.hpp"
 #include <gpiod.h>
+#include <ncurses.h>
 #include <iostream>
 
 GPIOButtons::GPIOButtons() {}

@@ -24,10 +24,7 @@ float PlayAlongGrader::compute_pitch_error_cents(float detected, float expected)
     return 1200.0f * std::log2(detected / expected);
 }
 
-SessionGrade PlayAlongGrader::grade_session(
-    const Track& track,
-    const std::vector<BeatFrameData>& recorded_beats
-) {
+SessionGrade PlayAlongGrader::grade_session(const Track& track, const std::vector<BeatFrameData>& recorded_beats) {
     SessionGrade result;
 
     float total_timing_score = 0.0f;
@@ -38,11 +35,11 @@ SessionGrade PlayAlongGrader::grade_session(
 
     std::map<std::pair<int,int>, std::pair<int,int>> expected_notes;
 
-    for (int bar_idx = 0; bar_idx < track.bars.size(); ++bar_idx) {
-    for (const auto& note : track.bars[bar_idx].beats) { 
-        expected_notes[{bar_idx, note.beat}] = {note.string, note.fret};
+    for (int bar_idx = 0; bar_idx < static_cast<int>(track.bars.size()); ++bar_idx) {
+        for (const auto& note : track.bars[bar_idx].beats) { 
+            expected_notes[{bar_idx, note.beat}] = {note.string, note.fret};
+        }
     }
-}
 
     for (const auto& beat : recorded_beats) {
 
@@ -60,12 +57,9 @@ SessionGrade PlayAlongGrader::grade_session(
         auto [string_index, fret] = expected_notes[key];
         float expected_freq = get_expected_frequency(string_index, fret);
 
-        // 🚨 FIXED BUG HERE (see explanation below)
-        double expectedTimeMs =
-            (beat.bar_index * 4 + (beat.beat_index - 1)) * beat_duration_ms;
+        double expectedTimeMs = (beat.bar_index * 4 + (beat.beat_index - 1)) * beat_duration_ms;
 
-        grade.timing_error_ms =
-            std::abs(beat.time_stamp_ms - expectedTimeMs);
+        grade.timing_error_ms = std::abs(beat.time_stamp_ms - expectedTimeMs);
 
         float timingScore = 0.0f;
         if (grade.timing_error_ms < 40) timingScore = 100;
@@ -73,8 +67,7 @@ SessionGrade PlayAlongGrader::grade_session(
         else if (grade.timing_error_ms < 120) timingScore = 60;
         else timingScore = 30;
 
-        float cents_error =
-            compute_pitch_error_cents(beat.detected_frequency, expected_freq);
+        float cents_error = compute_pitch_error_cents(beat.detected_frequency, expected_freq);
 
         grade.pitch_error_cents = cents_error;
 
@@ -99,10 +92,7 @@ SessionGrade PlayAlongGrader::grade_session(
         result.timing_score = total_timing_score / graded_beats;
         result.pitch_score = total_pitch_score / graded_beats;
         result.consistency_score = 100.0f;
-        result.overall_score =
-            0.4f * result.timing_score +
-            0.4f * result.pitch_score +
-            0.2f * result.consistency_score;
+        result.overall_score = 0.4f * result.timing_score + 0.4f * result.pitch_score + 0.2f * result.consistency_score;
     }
 
     return result;

@@ -2,6 +2,8 @@
 #define UI_PAGES_HPP
 
 #include <ncurses.h>
+#include <vector>
+#include "gpio_buttons.hpp"
 #include "real_time_audio_processor.hpp"
 #include "ui_types.hpp"
 
