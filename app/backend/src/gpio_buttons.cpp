@@ -4,6 +4,7 @@
 #include <chrono>
 #include <thread>
 #include <vector>
+#include <map>
 
 GPIOButtons::GPIOButtons() {}
 GPIOButtons::~GPIOButtons() { stop(); }
@@ -20,22 +21,28 @@ void GPIOButtons::stop() {
 }
 
 void GPIOButtons::run() {
+
     gpiod::chip chip("gpiochip0");
+
+    gpiod::line_settings settings;
+    settings.set_direction(gpiod::line::direction::INPUT);
+    settings.set_bias(gpiod::line::bias::PULL_UP);
+
+    gpiod::request_config config;
+    config.set_consumer("pi_buttons");
 
     std::vector<unsigned int> offsets = {17, 27, 24, 23};
 
-    gpiod::line_bulk lines = chip.get_lines(offsets);
+    std::map<unsigned int, gpiod::line_settings> line_config;
+    for (auto offset : offsets)
+        line_config[offset] = settings;
 
-    lines.request({
-        "pi_buttons",
-        gpiod::line_request::DIRECTION_INPUT,
-        gpiod::line_request::FLAG_BIAS_PULL_UP
-    });
+    auto request = chip.request_lines(config, line_config);
 
     std::vector<int> last = {1,1,1,1};
 
     while (running) {
-        auto values = lines.get_values();
+        auto values = request.get_values();
 
         for (size_t i = 0; i < values.size(); ++i) {
             if (values[i] == 0 && last[i] == 1) {
