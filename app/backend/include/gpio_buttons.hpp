@@ -19,4 +19,4 @@ private:
     std::atomic<bool> running{false};
 };
 
-#endif //GPIO_BUTTONS_H
+#endif // GPIO_BUTTONS_H

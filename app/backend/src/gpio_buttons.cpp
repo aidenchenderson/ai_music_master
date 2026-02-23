@@ -5,9 +5,13 @@
 #include <thread>
 
 GPIOButtons::GPIOButtons() {}
-GPIOButtons::~GPIOButtons() { stop(); }
+
+GPIOButtons::~GPIOButtons() {
+    stop();
+}
 
 void GPIOButtons::start() {
+    if (running) return;
     running = true;
     worker = std::thread(&GPIOButtons::run, this);
 }
@@ -20,8 +24,9 @@ void GPIOButtons::stop() {
 
 void GPIOButtons::run() {
 
-    struct gpiod_chip* chip = gpiod_chip_open_by_name("gpiochip0");
-    if (!chip) return;
+    struct gpiod_chip* chip = gpiod_chip_open("/dev/gpiochip0");
+    if (!chip)
+        return;
 
     unsigned int offsets[] = {17, 27, 24, 23};
     const int num_lines = 4;
@@ -42,7 +47,6 @@ void GPIOButtons::run() {
     gpiod_line_settings_set_bias(settings, GPIOD_LINE_BIAS_PULL_UP);
 
     gpiod_line_config_add_line_settings(line_cfg, offsets, num_lines, settings);
-
     gpiod_request_config_set_consumer(req_cfg, "pi_buttons");
 
     struct gpiod_line_request* request =
@@ -56,18 +60,28 @@ void GPIOButtons::run() {
         return;
     }
 
-    int last[] = {1, 1, 1, 1};
-    int values[4];
+    enum gpiod_line_value last[4] = {
+        GPIOD_LINE_VALUE_ACTIVE,
+        GPIOD_LINE_VALUE_ACTIVE,
+        GPIOD_LINE_VALUE_ACTIVE,
+        GPIOD_LINE_VALUE_ACTIVE
+    };
+
+    enum gpiod_line_value values[4];
 
     while (running) {
 
         if (gpiod_line_request_get_values(request, values) == 0) {
             for (int i = 0; i < num_lines; ++i) {
 
-                if (values[i] == 0 && last[i] == 1) {
+                // Button press = transition from ACTIVE (pull-up idle)
+                // to INACTIVE (button pressed to ground)
+                if (values[i] == GPIOD_LINE_VALUE_INACTIVE &&
+                    last[i] == GPIOD_LINE_VALUE_ACTIVE) {
+
                     if (i == 0) ungetch(KEY_UP);
                     if (i == 1) ungetch(KEY_DOWN);
-                    if (i == 2) ungetch(10);
+                    if (i == 2) ungetch(10);        // Enter
                     if (i == 3) ungetch(KEY_LEFT);
                 }
 
