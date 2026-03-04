@@ -1,3 +1,4 @@
 app/backend/lib/* linguist-vendored
 app/backend/kissfft/* linguist-vendored
 *.csv linguist-generated
+*.keras filter=lfs diff=lfs merge=lfs -text
