@@ -1,6 +1,6 @@
-# -------------------- #
-# build specifications #
-# -------------------- #
+#####################
+# compiler settings #
+#####################
 
 CC = gcc
 CXX = g++
@@ -22,11 +22,18 @@ INCLUDE_PATHS = \
 BUILD_DIR = build
 BIN_DIR = bin
 
-# compiler flags
-CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS) $(shell pkg-config --cflags libgpiod)
+# c compiler flags
 CFLAGS = -Wall $(INCLUDE_PATHS)
-# linker flags
-LDFLAGS = -pthread -ldl -lm -lncurses $(shell pkg-config --libs libgpiod)
+
+ifeq ($(OS), Windows_NT)
+    # windows specific linker and c++ compiler flags
+    LDFLAGS = -pthread -ldl -lm -lncurses
+    CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS)
+else
+    # linux specific linker and c++ compiler flags
+    LDFLAGS = -pthread -ldl -lm -lncurses -lcurl $(shell pkg-config --libs libgpiod)
+    CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS) $(shell pkg-config --cflags libgpiod)
+endif
 
 # source files
 CPP_SRCS = \
@@ -43,11 +50,11 @@ SRCS = $(CPP_SRCS) $(C_SRCS)
 OBJS = $(CPP_SRCS:%.cpp=$(BUILD_DIR)/%.o)
 OBJS += $(C_SRCS:%.c=$(BUILD_DIR)/%.o)
 
-TARGET = $(BIN_DIR)/guitar_genre_guru
+TARGET = $(BIN_DIR)/ai_music_master
 
-# ----------- #
-# build rules #
-# ----------- #
+#####################
+# COMPILATION RULES #
+#####################
 
 all: $(TARGET)
 
@@ -65,9 +72,9 @@ $(BUILD_DIR)/%.o: %.c
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# --------- #
-# utilities #
-# --------- #
+#############
+# UTILITIES #
+#############
 
 .PHONY: clean rebuild run
 clean:
