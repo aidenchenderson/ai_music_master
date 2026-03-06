@@ -27,7 +27,7 @@ CFLAGS = -Wall $(INCLUDE_PATHS)
 
 ifeq ($(OS), Windows_NT)
     # windows specific linker and c++ compiler flags
-    LDFLAGS = -pthread -ldl -lm -lncurses
+    LDFLAGS = -pthread -ldl -lm -lncurses -lcurl
     CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS)
 else
     # linux specific linker and c++ compiler flags

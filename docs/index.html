@@ -1,21 +1,19 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-
-  <meta name="viewport" content="width=device-width ,initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta charset="UTF-8">
   <title>AI Music Master</title>
-  <link rel="stylesheet" href="styles.css"/>
-  <link rel="icon" type="image/xml" href="assets/logo.png">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/png" href="assets/logo.png">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
 </head>
 <body>
   <header class="topBar">
     <div class="topBarContainer">
-      <img class="logo" src="assets/logoMcAI.svg" alt="logoMcAI">
+      <img id="siteLogo" class="logo" src="assets/logo-light.svg" alt="website logo">
       <h1 class="topBarHeader">- AI Music Master -</h1>
-      <button id="darkModeSwitch" class="toggle" type="button">
+      <button id="darkModeSwitch" class="toggle" type="button" aria-label="Toggle Dark Mode">
         <i class="fa-solid fa-circle-half-stroke"></i>
       </button>
     </div>
@@ -25,31 +23,31 @@
       <section class="section">
         <div class="grid">
           <div class="gridBox">
-            <h2 class="infoTitle">Project Information:</h2>
+            <h2 class="infoTitle">Overview:</h2>
             <p class="info">
-              Beginner guitarists often find it difficult to apply music theory while practicing. AI Music Master helps bridge that gap by giving real-time, beginner-friendly feedback during play. <br>
-
-               <br>
-                - Captures live guitar audio<br>
-                - Extracts musical features <br>
-                - Uses a terminal UI for user interaction<br>
-                - CNN analyzes freestyle playing<br>
-                - LLM provides guided learning feedback<br>
-
+              Music Master helps new guitarists learn core fundamentals and gives context about influential genres,
+              using AI-powered, real-time audio analysis.
             </p>
+            <h2 class="infoTitle">Project Mission:</h2>
+            <p class="info">
+              Our custom-trained CNN follows a ResNet architecture to extract complex audio patterns over a 
+              wide range of descriptors, capturing rhythm, timbre, brightness, and more! With a portable design, guitarists can
+              continue their learning journey no matter where they are.
+            </p>
+            <h2 class="infoTitle">Features:</h2>
+            <ul class="infoList">
+              <li>Audio Engine, Feature Extractor, and Audio Processor</li>
+              <li>Terminal User Interface (TUI) with Recording Sessions</li>
+              <li>Genre Classification CNN</li>
+              <li>Summarization LLM API</li>
+            </ul>
           </div>
+          
           <div class="gridBox">
             <div class="slideshow">
-              <button id="prevBtn" class="slideBtn prev" type="button">
-                &#8249;
-
-              </button>
-              <img id="slideImage" class="slideshowImg" alt="slide Image"/>
-            
-              <button id="nextBtn" class="slideBtn next" type="button">
-                &#8250;
-              </button>
-
+              <button id="prevBtn" class="slideBtn prev" type="button">&#8249;</button>
+              <img id="slideImage" class="slideshowImg" alt="Project slide">
+              <button id="nextBtn" class="slideBtn next" type="button">&#8250;</button>
             </div>
           </div>
         </div>
