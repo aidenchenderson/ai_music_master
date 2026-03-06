@@ -12,7 +12,7 @@ While Music Master functions as a standalone desktop application, it was develop
 
 * [Overview](#ai-music-master-)
 * [Contents](#contents)
-* [Tech Stack](#tech-architecture)
+* [Tech Stack](#tech-stack)
     * [AI](#ai--analysis)
     * [Backend](#backend--digital-signal-processing)
     * [Frontend](#frontend--ui)
@@ -20,9 +20,9 @@ While Music Master functions as a standalone desktop application, it was develop
 * [Getting Started](#getting-started)
     * [Unix (Linux/macOS)](#unix-linuxmacos)
     * [Windows](#windows)
-* [More on Genre Classification](#genre-classification-cnn)
 * [License](#license)
-* [Acknowledgments](#acknowledgements)
+* [Acknowledgments](#acknowledgments)
+* [Extras](#extras)
 
 
 
