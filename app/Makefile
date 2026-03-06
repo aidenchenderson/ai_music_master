@@ -26,7 +26,7 @@ BIN_DIR = bin
 CXXFLAGS = -std=c++23 -Wall $(INCLUDE_PATHS) $(shell pkg-config --cflags libgpiod)
 CFLAGS = -Wall $(INCLUDE_PATHS)
 # linker flags
-LDFLAGS = -pthread -ldl -lm -lncurses $(shell pkg-config --libs libgpiod)
+LDFLAGS = -pthread -ldl -lm -lncurses -lcurl $(shell pkg-config --libs libgpiod)
 
 # source files
 CPP_SRCS = \

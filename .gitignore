@@ -22,3 +22,6 @@
 # system files
 .DS_Store
 __pycache__/
+
+# saved recordings
+/app/data/sessions/
