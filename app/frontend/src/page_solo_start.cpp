@@ -38,6 +38,18 @@ PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpi
     }
 
     const double RECORD_SECONDS = AudioConfig::FREESTYLE_SECONDS;
+    const int COUNTDOWN = 3;
+
+    for (int i = COUNTDOWN; i > 0; --i) {
+        werase(win);
+        mvwprintw(win, 3, 2, "Freestyle starting in...");
+        mvwprintw(win, 5, 4, "%d", i);
+        mvwprintw(win, 7, 2, "Get ready!");
+        wrefresh(win);
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
     auto start_time = std::chrono::high_resolution_clock::now();
 
     std::vector<std::vector<float>> collected_features;
@@ -88,9 +100,7 @@ PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpi
 
     mvwprintw(win, 3, 2, "Recording complete:");
     wrefresh(win);
-
     std::string genre = "Unknown";
-    float confidence = 0.0f;
     try {
         std::filesystem::path sourceDir = std::filesystem::path(__FILE__).parent_path();
         std::filesystem::path pythonScript = sourceDir / "../../AI/genre_inference.py";
@@ -101,8 +111,7 @@ PageResult runSoloPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpi
         size_t comma_pos = python_output.find(',');
         if (comma_pos != std::string::npos) {
             genre = python_output.substr(0, comma_pos);
-            confidence = std::stof(python_output.substr(comma_pos + 1));
-            mvwprintw(win, 4, 2, "Predicted genre: %s (%.2f)", genre.c_str(), confidence);
+            mvwprintw(win, 4, 2, "Predicted genre: %s", genre.c_str());
         } else {
             mvwprintw(win, 9, 2, "Genre detection failed");
         }
