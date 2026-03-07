@@ -5,24 +5,25 @@
 
 namespace LLM {
 
-
 enum class Status {
-  Ok,
-  Error
+    Ok,
+    Error
 };
+
 struct Result {
-  Status status = Status::Ok;
-  std::string text;
-  std::string error;                      
+    Status status = Status::Ok;
+    std::string text;
+    std::string error;
 };
+
 struct Request {
-  std::string baseUrl = "http://127.0.0.1:11434";//ollama base url
-  std::string prompt;//user input
-  std::string llmModel = "gemma3:1b";//model name
-  
+    std::string baseUrl = "http://127.0.0.1:11434"; // ollama base url
+    std::string prompt;                             // user input
+    std::string llmModel = "gemma3:1b";             // model name
 };
-Result Generate(const Request& req);
 
+Result Generate(const Request &req);
 
-} 
-#endif
+}
+
+#endif // LLM_HPP

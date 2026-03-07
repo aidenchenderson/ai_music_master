@@ -3,24 +3,8 @@
 
 #include <string>
 #include <vector>
-
-struct Note {
-    int beat;
-    int string;
-    int fret;
-};
-
-struct Bar {
-    int number;
-    std::vector<Note> beats;
-};
-
-struct Track {
-    std::string title;
-    int bpm;
-    std::string timeSignature;
-    std::vector<Bar> bars;
-};
+#include "track_types.hpp"
+#include "grader.hpp"
 
 enum class PageId {
     MainMenu,
@@ -40,6 +24,9 @@ struct UIContext {
     std::vector<std::vector<float>> lastSessionFeatures;
     Track trackData;
     bool playAlong = false;
+
+    SessionGrade lastGrade;
+    std::string llmFeedback;
 };
 
 struct PageResult {

@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "beat_data.hpp"
-#include "ui_types.hpp"
+#include "track_types.hpp"
 
 // grade for a single beat
 struct BeatGrade {
@@ -26,10 +26,7 @@ struct SessionGrade {
 
 class PlayAlongGrader {
 public:
-    static SessionGrade grade_session(
-        const Track& track,
-        const std::vector<BeatFrameData>& recordedBeats
-    );
+    static SessionGrade grade_session(const Track& track, const std::vector<BeatFrameData>& recordedBeats);
 
 private:
     static float get_expected_frequency(int stringIndex, int fret);

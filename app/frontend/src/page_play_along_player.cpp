@@ -8,6 +8,10 @@
 #include "feature_writer.hpp"
 #include "gpio_buttons.hpp"
 
+#include "grader.hpp"
+#include "llm.hpp"
+#include "utils.hpp"
+
 void renderTabBar(WINDOW* win, const Bar& bar, int startX, int startY) {
     const char* strings[] = {"e", "B", "G", "D", "A", "E"};
 
@@ -89,7 +93,7 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
         int input = wgetch(win);
 
         nodelay(win, FALSE);
-        
+
         if (input == 27) {
             playing = false;
             break;
@@ -99,7 +103,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
 
         werase(win);
 
-        // Header
         if (currentBar < 0) {
             int count = (currentBar + 2) * 4 + currentBeat;
             mvwprintw(win, 0, 2, "BPM:%d  Count:%d/8", ctx.trackData.bpm, count);
@@ -113,7 +116,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
         int indicatorX = tabStartX + 2 + (currentBeat - 1) * 5;
         mvwprintw(win, tabStartY - 1, indicatorX, "^");
 
-        // left measure
         if (leftBar >= 0 && leftBar < (int)ctx.trackData.bars.size()) {
             renderTabBar(win, ctx.trackData.bars[leftBar], tabStartX, tabStartY);
         } else if (leftBar == (int)ctx.trackData.bars.size()) {
@@ -122,7 +124,6 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
             renderEmptyBar(win, tabStartX, tabStartY);
         }
 
-        // right measure
         if (rightBar >= 0 && rightBar < (int)ctx.trackData.bars.size()) {
             renderTabBar(win, ctx.trackData.bars[rightBar], tabStartX + barGap, tabStartY);
         } else if (rightBar == (int)ctx.trackData.bars.size()) {
@@ -158,17 +159,59 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
 
     session.stop();
 
-    auto frames = session.getAllMelFrames();
+    UIContext nextCtx = ctx;
 
-    if (!frames.empty()) {
-        FeatureWriter writer("data/sessions/last_playalong_session.csv");
-        writer.open_file(true, frames[0].size());
-        writer.write_all(frames);
-        writer.close_file();
+    auto frames = session.getAllMelFrames();
+    nextCtx.lastSessionFeatures = frames;
+
+    std::vector<BeatFrameData> detectedBeats;
+
+    auto beatFrames = session.getBeatAlignedFrames();
+
+    for (const auto& b : beatFrames) {
+
+        float energy = 0.0f;
+        for (float v : b.melFrame) {
+            energy += std::abs(v);
+        }
+
+        BeatFrameData beat{};
+        beat.bar_index = b.barIndex;
+        beat.beat_index = b.beatIndex;
+        beat.energy = energy;
+        beat.detected_frequency = 0.0f; // placeholder until pitch detection added
+        beat.time_stamp_ms = (b.barIndex * 4 + (b.beatIndex - 1)) * (60000.0 / ctx.trackData.bpm);
+
+        detectedBeats.push_back(beat);
     }
 
-    UIContext nextCtx = ctx;
-    nextCtx.lastSessionFeatures = session.getAllMelFrames();
+    SessionGrade grade = PlayAlongGrader::grade_session(ctx.trackData, detectedBeats);
+    nextCtx.lastGrade = grade;
+
+    std::string prompt =
+    "Role: Professional Guitar Teacher.\n"
+    "Task: Provide immediate, direct feedback based on scores.\n"
+    "Constraint 1: Start your response immediately with the critique.\n"
+    "Constraint 2: DO NOT use conversational filler like 'Okay,' 'Let's see,' or 'Here is your feedback.'\n"
+    "Constraint 3: No headings, no bullets, max 3 sentences.\n\n"
+    "Include what went well, what needs improvement, and one practice tip.\n"
+    
+    "Scores:\n"
+    "- Timing: " + std::to_string(grade.timing_score) + "/100\n"
+    "- Pitch: " + std::to_string(grade.pitch_score) + "/100\n\n"
+    
+    "Feedback (start directly):";
+
+    LLM::Request req;
+    req.prompt = prompt;
+
+    auto llmResult = LLM::Generate(req);
+
+    if (llmResult.status == LLM::Status::Ok) {
+        nextCtx.llmFeedback = sanitize_ascii(llmResult.text);
+    } else {
+        nextCtx.llmFeedback = "LLM error: " + llmResult.error;
+    }
 
     return {PageId::Summary, nextCtx};
 }
