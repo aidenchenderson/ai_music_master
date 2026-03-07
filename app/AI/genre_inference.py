@@ -3,6 +3,7 @@ import numpy as np
 import librosa
 import pickle
 import tensorflow as tf
+import pandas as pd
 import keras 
 
 # model paths
@@ -49,9 +50,7 @@ def predict_genre(audio_path):
     signal, _ = librosa.load(audio_path, sr=SR, mono=True, duration=CHUNK_DURATION)
 
     mel_spec = extract_mel_spectrogram(signal, SR)
-
     mel_spec = mel_spec[np.newaxis, ..., np.newaxis]
-
     mel_spec = mel_spec.astype(np.float32)
 
     predictions = model.predict(mel_spec, verbose=0)
@@ -63,14 +62,24 @@ def predict_genre(audio_path):
 
     return predicted_genre, confidence
 
+def predict_from_csv(csv_path):
+    df = pd.read_csv(csv_path)
+    features = df.values.astype(np.float32)
+    
+    input_data = features[np.newaxis, ..., np.newaxis]
+    
+    predictions = model.predict(input_data, verbose=0)
+    predicted_index = np.argmax(predictions, axis=1)[0]
+    return label_encoder.inverse_transform([predicted_index])[0]
+
 # application entry point
 if __name__ == "__main__":
-
-    audio_file = os.path.join(BASE_DIR, "sample_audio.mp3")
-
-    if not os.path.exists(audio_file):
-        print(f"Audio file not found: {audio_file}")
-    else:
-        genre, confidence = predict_genre(audio_file)
-        print(f"Predicted genre: {genre}")
-        print(f"Confidence: {confidence:.4f}")
+    import sys
+    if len(sys.argv) > 1:
+        try:
+            # detected genre output to be used by app
+            genre = predict_from_csv(sys.argv[1])
+            print(genre)
+        except Exception as e:
+            # unknown to stop run time errors
+            print("Unknown")

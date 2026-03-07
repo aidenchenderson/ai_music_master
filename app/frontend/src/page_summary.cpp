@@ -17,7 +17,7 @@ PageResult runSummaryPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_b
 
         mvwprintw(win, 1, (xWin - 15)/2, "Session Summary");
 
-        mvwprintw(win, 2, 2, "AI Feedback:");
+        mvwprintw(win, 2, 1, "AI Feedback:");
 
         auto wrapped = wrap_text(ctx.llmFeedback, xWin - 4);
 

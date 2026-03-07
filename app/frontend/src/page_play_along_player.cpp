@@ -190,7 +190,7 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
 
     std::string prompt =
     "Role: Professional Guitar Teacher.\n"
-    "Task: Provide immediate, direct feedback based on scores.\n"
+    "Task: Provide immediate, direct feedback based on scores (be critical where needed but fluff some compliments where they did well).\n"
     "Constraint 1: Start your response immediately with the critique.\n"
     "Constraint 2: DO NOT use conversational filler like 'Okay,' 'Let's see,' or 'Here is your feedback.'\n"
     "Constraint 3: No headings, no bullets, max 3 sentences.\n\n"
