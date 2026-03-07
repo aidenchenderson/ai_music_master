@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include "session_types.hpp"
 
 struct Note {
     int beat;
@@ -39,7 +40,10 @@ struct UIContext {
     std::string trackFilename;
     std::vector<std::vector<float>> lastSessionFeatures;
     Track trackData;
-    bool playAlong = false;
+    bool playAlong;
+    SessionGrade lastGrade;
+    std::string llmFeedback;
+    std::string sessionGenre;
 };
 
 struct PageResult {

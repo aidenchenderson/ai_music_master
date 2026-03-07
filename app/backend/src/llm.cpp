@@ -18,7 +18,11 @@ static Result CallLLM(const Request& request){
   nlohmann::json body = {
     {"model", request.llmModel},
     {"prompt", request.prompt},
-    {"stream", false}
+    {"stream", false},
+    {"options", {
+        {"temperature", 0.6},
+        {"num_predict", 125}
+    }}
   };
 
   std::string responseStr;

@@ -38,7 +38,7 @@ PageResult runMainMenuPage(WINDOW* win, const UIContext& ctx, GPIOButtons& gpio_
         }
 
         wattron(win, A_BOLD);
-        mvwprintw(win, 1, 2, "AI-Music-Master");
+        mvwprintw(win, 1, 2, "AI Music Master");
         wattroff(win, A_BOLD);
         mvwprintw(win, 12, 2, "** Use UP/DOWN and SELECT **");
         mvwprintw(win, 13, 2, "Selected device index: %d", ctx.selectedDeviceIndex);

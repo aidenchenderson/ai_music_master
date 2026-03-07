@@ -13,6 +13,9 @@ struct BeatAlignedMelFrame {
     std::vector<float> melFrame;
 };
 
+float computeEnergy(const std::vector<float>& mel);
+float estimatePitch(const std::vector<float>& mel);
+
 class RecordingSession {
 public:
     RecordingSession(int deviceIndex, int bpm);

@@ -8,6 +8,11 @@
 #include "feature_writer.hpp"
 #include "gpio_buttons.hpp"
 
+#include "grader.hpp"
+#include "llm.hpp"
+#include "string_utils.hpp"
+
+
 void renderTabBar(WINDOW* win, const Bar& bar, int startX, int startY) {
     const char* strings[] = {"e", "B", "G", "D", "A", "E"};
 
@@ -158,17 +163,57 @@ PageResult runPlayAlongPlayerPage(WINDOW* win, const UIContext& ctx, GPIOButtons
 
     session.stop();
 
-    auto frames = session.getAllMelFrames();
+    std::vector<BeatFrameData> beatData;
 
-    if (!frames.empty()) {
-        FeatureWriter writer("data/sessions/last_playalong_session.csv");
-        writer.open_file(true, frames[0].size());
-        writer.write_all(frames);
-        writer.close_file();
+    auto melFrames = session.getBeatAlignedFrames();
+
+    for (const auto& frame : melFrames) {
+
+        BeatFrameData beat;
+
+        beat.bar_index = frame.barIndex;
+        beat.beat_index = frame.beatIndex;
+
+        beat.detected_frequency = estimatePitch(frame.melFrame);
+        beat.energy = computeEnergy(frame.melFrame);
+
+        beat.time_stamp_ms = 0;
+
+        beatData.push_back(beat);
     }
 
+    SessionGrade grade = PlayAlongGrader::grade_session(ctx.trackData, beatData);
+
+    std::string prompt =
+    "Role: Professional Guitar Teacher.\n"
+    "Task: Provide immediate, direct feedback based on scores (be critical where needed but fluff some compliments where they did well).\n"
+    "Constraint 1: Start your response immediately with the critique.\n"
+    "Constraint 2: DO NOT use conversational filler like 'Okay,' 'Let's see,' or 'Here is your feedback.'\n"
+    "Constraint 3: No headings, no bullets, max 3 sentences.\n\n"
+    "Include what went well, what needs improvement, and one practice tip.\n"
+    
+    "Scores:\n"
+    "- Timing: " + std::to_string(grade.timing_score) + "/100\n"
+    "- Pitch: " + std::to_string(grade.pitch_score) + "/100\n\n"
+    "- Consistency: " + std::to_string(grade.consistency_score) + "/100\n"
+    
+    "Feedback (start directly):";
+
+    LLM::Request req;
+    req.baseUrl = "http://localhost:11434";
+    req.llmModel = "gemma3:1b";
+    req.prompt = prompt;
+
+    LLM::Result llmResult = LLM::Generate(req);
+
     UIContext nextCtx = ctx;
-    nextCtx.lastSessionFeatures = session.getAllMelFrames();
+    nextCtx.lastGrade = grade;
+
+    if (llmResult.status == LLM::Status::Ok) {
+        nextCtx.llmFeedback = sanitizeAscii(llmResult.text);
+    } else {
+        nextCtx.llmFeedback = "LLM feedback unavailable.";
+    }
 
     return {PageId::Summary, nextCtx};
 }

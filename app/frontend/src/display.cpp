@@ -5,6 +5,7 @@
 #include "ui_pages.hpp"
 #include "ui_types.hpp"
 #include "gpio_buttons.hpp"
+#include "recording_session.hpp"
 
 void runMainUI() {
     initscr();

@@ -1,9 +1,18 @@
 import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
 import numpy as np
+import pandas as pd
 import librosa
 import pickle
 import tensorflow as tf
-import keras 
+import keras
+import argparse
+
+import warnings
+from sklearn.exceptions import InconsistentVersionWarning
+warnings.filterwarnings("ignore", category=InconsistentVersionWarning)
 
 # model paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -26,12 +35,9 @@ if not os.path.exists(ENCODER_PATH):
     raise FileNotFoundError(f"Encoder not found at {ENCODER_PATH}")
 
 model = keras.models.load_model(MODEL_PATH, compile=False)
-print("Model loaded")
 
 with open(ENCODER_PATH, "rb") as f:
     label_encoder = pickle.load(f)
-
-print("Label encoder loaded")
 
 # feature extraction
 def extract_mel_spectrogram(signal, sr):
@@ -63,14 +69,46 @@ def predict_genre(audio_path):
 
     return predicted_genre, confidence
 
+def csv_to_mel_input(csv_path):
+    # read numeric CSV, skip header if present
+    df = pd.read_csv(csv_path, header=0)
+    mel = df.apply(pd.to_numeric, errors='coerce').to_numpy(dtype=np.float32)
+
+    # transpose: rows = n_mels, cols = time steps
+    mel = mel.T  # shape becomes (40, time_steps)
+
+    # optionally, crop/pad to model's expected time_steps
+    target_time_steps = 282
+    if mel.shape[1] > target_time_steps:
+        mel = mel[:, :target_time_steps]  # crop extra frames
+    elif mel.shape[1] < target_time_steps:
+        # pad with zeros
+        pad_width = target_time_steps - mel.shape[1]
+        mel = np.pad(mel, ((0, 0), (0, pad_width)), mode='constant', constant_values=0)
+
+    # add batch and channel dimensions
+    mel = np.expand_dims(mel, axis=0)   # batch dimension
+    mel = np.expand_dims(mel, axis=-1)  # channel dimension
+
+    return mel.astype(np.float32)
+
+def predict_genre_from_csv(csv_path):
+    mel_input = csv_to_mel_input(csv_path)
+    predictions = model.predict(mel_input, verbose=0)
+    
+    predicted_index = np.argmax(predictions, axis=1)[0]
+    confidence = float(np.max(predictions))
+    
+    predicted_genre = label_encoder.inverse_transform([predicted_index])[0]
+    return predicted_genre, confidence
+
 # application entry point
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--csv", type=str, help="Path to CSV file")
+    args = parser.parse_args()
 
-    audio_file = os.path.join(BASE_DIR, "sample_audio.mp3")
-
-    if not os.path.exists(audio_file):
-        print(f"Audio file not found: {audio_file}")
-    else:
-        genre, confidence = predict_genre(audio_file)
-        print(f"Predicted genre: {genre}")
-        print(f"Confidence: {confidence:.4f}")
+    if args.csv:
+        genre, confidence = predict_genre_from_csv(args.csv)
+        # line produced to std out is read by C++ through IPC
+        print(f"{genre},{confidence:.4f}")

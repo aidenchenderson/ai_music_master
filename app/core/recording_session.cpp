@@ -66,3 +66,31 @@ std::vector<std::vector<float>> RecordingSession::getAllMelFrames() const {
 std::vector<BeatAlignedMelFrame> RecordingSession::getBeatAlignedFrames() const {
     return beatFrames;
 }
+
+
+float computeEnergy(const std::vector<float>& mel) {
+    float sum = 0.0f;
+
+    for (float v : mel) {
+        sum += v;
+    }
+
+    return sum / mel.size();
+}
+
+float estimatePitch(const std::vector<float>& mel) {
+    int maxIndex = 0;
+
+    for (int i = 1; i < static_cast<int>(mel.size()); i++) {
+        if (mel[i] > mel[maxIndex])
+            maxIndex = i;
+    }
+
+    // really (extremely) rough estimates
+    float minFreq = 80.0f;
+    float maxFreq = 1000.0f;
+
+    float binWidth = (maxFreq - minFreq) / mel.size();
+
+    return minFreq + maxIndex * binWidth;
+}
